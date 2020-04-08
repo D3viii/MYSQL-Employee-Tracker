@@ -7,16 +7,16 @@ var connection = mysql.createConnection({
   port: 3306,
 
   user: "root",
- 
+
   password: "root",
-  database: "employeeTrackerdb"
+  database: "employeeTrackerdb",
 });
 
-connection.connect(function(err) {
+connection.connect(function (err) {
   if (err) throw err;
-  console.log("Sucess")
+  console.log("Sucess");
   //   addInfo();
-//   console.log("This works on:" + port);
+  //   console.log("This works on:" + port);
   start();
 });
 
@@ -40,26 +40,183 @@ function start() {
     })
     .then(function (answer) {
       // based on their answer, either call the bid or the post functions
-      if (answer.AddViewUpdate === "ADD") {
-        addDRE();
-      } else if (answer.AddViewUpdate === "VIEW") {
-        viewDRE();
-      } else if (answer.AddViewUpdate === "UPDATE") {
-        updateDRE();
-      } else {
-        connection.end();
+      switch (answer.AddViewUpdate) {
+        case "ADD":
+          addDRE();
+          break;
+
+        case "VIEW":
+          viewDRE();
+          break;
+
+        case "UPDATE":
+          updateDRE();
+          break;
       }
     });
-  
 }
 
 function addDRE() {
+  inquirer
+    .prompt({
+      name: "AddDRE",
+      type: "list",
+      message: "Would you like to [Departments], [Roles], [Employee]?",
+      choices: ["Departments", "Roles", "Employee"],
+    })
+    .then(function (answer) {
+      // based on their answer, either call the bid or the post functions
+      switch (answer.AddDRE) {
+        case "Departments":
+          addDepartmentsDRE();
+          break;
+
+        case "Roles":
+          addRolesDRE();
+          break;
+
+        case "Employee":
+          addEmployeesDRE();
+          break;
+      }
+    });
   // inquirer.prompt({});
 }
 
+function addDepartmentsDRE() {
+  inquirer
+    .prompt([
+      { name: "Department", type: "input", message: "Department Name: " },
+      {
+        name: "id",
+        type: "input",
+        message: "id#",
+      },
+    ])
+    .then(function (answer) {
+      connection.query(
+        "INSERT INTO departments SET ?",
+        {
+          id: answer.id,
+          names: answer.Department,
+        },
+        function (err) {
+          if (err) throw err;
+          console.log("Department Added!");
+          start();
+        }
+      );
+    });
+}
+
+function addRolesDRE() {
+  inquirer
+    .prompt([
+      { name: "title", type: "input", message: "Role Name: " },
+      {
+        name: "id",
+        type: "input",
+        message: "id#",
+      },
+      {
+        name: "salary",
+        type: "input",
+        message: "Salary: $ "
+      },
+      {
+        name: "departmentId",
+        type: "input",
+        message: "department_id: "
+      }
+    ])
+    .then(function (answer) {
+      connection.query(
+        "INSERT INTO roles SET ?",
+        {
+          id: answer.id,
+          title: answer.title,
+          salary: answer.salary,
+          department_id: answer.departmentId
+        },
+        function (err) {
+          if (err) throw err;
+          console.log("Roles Added!");
+          start();
+        }
+      );
+    });
+}
+
+function addEmployeesDRE() {
+  inquirer
+    .prompt([
+      { name: "role_id", type: "input", message: "Role ID: " },
+      {
+        name: "id",
+        type: "input",
+        message: "id#",
+      },
+      {
+        name: "firstName",
+        type: "input",
+        message: "First Name:  "
+      },
+      {
+        name: "lastName",
+        type: "input",
+        message: "Last Name: "
+      }
+    ])
+    .then(function (answer) {
+      connection.query(
+        "INSERT INTO employee SET ?",
+        {
+          id: answer.id,
+          role_id: answer.role_id,
+          first_name: answer.firstName,
+          last_name: answer.lastName
+        },
+        function (err) {
+          if (err) throw err;
+          console.log("Employee Added!");
+          start();
+        }
+      );
+    });
+}
+
 function viewDRE() {
+  inquirer
+    .prompt({
+      name: "viewDRE",
+      type: "list",
+      message: "Would you like to [Departments], [Roles], [Employee]?",
+      choices: ["Departments", "Roles", "Employee"],
+    })
+    .then(function (answer) {
+      // based on their answer, either call the bid or the post functions
+      switch (answer.AddDRE) {
+        case "Departments":
+          viewDepartmentsDRE();
+          break;
+
+        case "Roles":
+          viewRolesDRE();
+          break;
+
+        case "Employee":
+          viewEmployeesDRE();
+          break;
+      }
+    });
   // inquirer.prompt({});
 }
+
+function viewDepartmentsDRE() {}
+
+function viewRolesDRE() {}
+
+function viewEmployeesDRE() {}
 
 function updateDRE() {
   // inquirer.prompt({});
